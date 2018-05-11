@@ -1,0 +1,118 @@
+// SERVO MOTOR
+#include <Servo.h>
+
+Servo myservo; 
+int pos = 0; 
+
+//MOTORS 
+#define MOTOR_A_1A 6   // yellow
+#define MOTOR_A_1B 7  // purple
+#define MOTOR_B_1A 5 // orange  
+#define MOTOR_B_1B 4 // blue
+#define ANALOG_HIGH 250
+
+// SOUND SENSOR
+int sensorPin = A0;
+int sensorPin2 = 12; //CHANGE IT!
+
+//CONSTANTS
+#define MAX_DISTANCE 50
+#define THRESHOLD 3
+#define LEFTTHRESHOLD 22
+#define SOUNDTHRESHOLD 50
+
+
+//SENSORS
+#include <NewPing.h>
+#define TRIGGER 9 // white
+#define ECHO 8 // blue
+NewPing frontsonar(TRIGGER, ECHO, MAX_DISTANCE);
+
+void setup() {
+  Serial.begin(9600); // for sound sensor
+  myservo.attach(13); // for servo motor
+  pinMode(2, OUTPUT); //blue LED
+  pinMode(3, OUTPUT); //green LED
+  
+  Serial.begin(115200);
+  // Motor pins need to be OUTPUT.
+  pinMode(MOTOR_A_1A, OUTPUT);
+  pinMode(MOTOR_A_1B, OUTPUT);
+  pinMode(MOTOR_B_1A, OUTPUT);
+  pinMode(MOTOR_B_1B, OUTPUT);
+
+}
+
+void wheelForwards() {
+    analogWrite(MOTOR_A_1A, ANALOG_HIGH);
+    analogWrite(MOTOR_A_1B, LOW);
+    analogWrite(MOTOR_B_1A, ANALOG_HIGH);
+    analogWrite(MOTOR_B_1B, LOW);
+}
+
+void wheelBackwards() {
+  analogWrite(MOTOR_A_1A, LOW);
+  analogWrite(MOTOR_A_1B, ANALOG_HIGH);
+  analogWrite(MOTOR_B_1A, LOW);
+  analogWrite(MOTOR_B_1B, ANALOG_HIGH);
+}
+
+void wheelStop() {
+  analogWrite(MOTOR_A_1A, LOW);
+  analogWrite(MOTOR_A_1B, LOW);
+  analogWrite(MOTOR_B_1A, LOW);
+  analogWrite(MOTOR_B_1B, LOW);
+  delay(500);
+}
+
+void turnLeft() {
+  analogWrite(MOTOR_A_1A, ANALOG_HIGH);
+  analogWrite(MOTOR_A_1B, LOW);
+  analogWrite(MOTOR_B_1A, LOW);
+  analogWrite(MOTOR_B_1B, LOW);
+}
+                
+void turnRight() {
+  analogWrite(MOTOR_A_1A, LOW);
+  analogWrite(MOTOR_A_1B, LOW);
+  analogWrite(MOTOR_B_1A, ANALOG_HIGH);
+  analogWrite(MOTOR_B_1B, LOW);
+}
+
+void servoRight() {
+   for (pos = 0; pos <= 180; pos+=1) {
+    myservo.write(pos);
+    digitalWrite(2, HIGH);
+    digitalWrite(3, LOW);
+    delay(15);
+    digitalWrite(2, LOW);
+    digitalWrite(3, HIGH);
+    delay(15);  
+  }
+}
+
+void servoLeft() {
+    for (pos = 180; pos >=0; pos-=1) {
+    myservo.write(pos);
+    digitalWrite(2, HIGH);
+    digitalWrite(3, LOW);
+    delay(15);
+    digitalWrite(2, LOW);
+    digitalWrite(3, HIGH);
+    delay(15);
+  } 
+}
+
+void loop() {
+  if ((analogRead(sensorPin)) > SOUNDTHRESHOLD) {
+    turnRight();
+    servoRight();
+    wheelStop();
+    turnRight();
+    servoLeft();
+    wheelStop();
+    digitalWrite(2, LOW);
+    digitalWrite(3, LOW);
+  }
+  wheelStop();
+}
